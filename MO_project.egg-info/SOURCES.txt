@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+MO_project/__init__.py
+MO_project/__main__.py
+MO_project/cli.py
+MO_project/core.py
+MO_project.egg-info/PKG-INFO
+MO_project.egg-info/SOURCES.txt
+MO_project.egg-info/dependency_links.txt
+MO_project.egg-info/entry_points.txt
+MO_project.egg-info/top_level.txt
+tests/test_cli.py
+tests/test_core.py

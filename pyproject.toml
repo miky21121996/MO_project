@@ -1,0 +1,15 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MO_project"
+version = "0.0.1"
+description = "CLI model validation application against moorings"
+readme = "README.md"
+authors = [{ name = "Giurato Michele", email = "michele.giurato@cmcc.it" }]
+
+[project.scripts]
+MO_project = "MO_project.__main__:main"
