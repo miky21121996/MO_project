@@ -14,9 +14,6 @@ def main():
         Destaggering(config.destag_date_in, config.destag_date_fin, config.input_paths, config.path_to_out_destag_model_folder, config.exp_names, config.destag_time_res, config.mask_paths)
         
     if args.obs_extract:
-        print(config.path_to_accepted_metadata_obs_file)
-        print(config.path_to_out_obs_ts)
-        print(config.path_to_plot_ts)
         subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',\
             '0510', 'python', 'obs_extraction.py', config.obs_date_in, config.obs_date_fin, config.path_to_metadata_obs_file,\
             config.time_res_to_average, config.depth_obs, config.nan_treshold,\
