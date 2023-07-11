@@ -18,13 +18,13 @@ def main():
                      config.path_to_out_destag_model_folder, config.exp_names, config.destag_time_res, config.mask_paths)
 
     if args.obs_extract:
-        subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
+        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'obs_extraction.py', config.obs_date_in, config.obs_date_fin, config.path_to_metadata_obs_file,
                         config.time_res_to_average, config.depth_obs, config.nan_treshold,
                         config.path_to_accepted_metadata_obs_file, config.path_to_out_obs_ts, config.path_to_plot_ts])
 
     if args.mod_extract:
-        subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
+        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'mod_extraction.py', config.mod_date_in, config.mod_date_fin, config.path_to_input_metadata_obs_file,
                         " ".join(config.time_res_model), " ".join(config.time_res_model_to_average), " ".join(
                             config.mod_exp_names), config.depth_obs_for_mod, " ".join(config.path_to_mask),

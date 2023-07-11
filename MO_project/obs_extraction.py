@@ -162,6 +162,9 @@ def main(args):
             bool_nan = Check_Nan(daily_times, daily_velocities, nan_treshold)
             if bool_nan:
                 if np.size(dict_value['EWCT'][:]) > 0 and np.size(dict_value['NSCT'][:]) > 0:
+                    print("sono nell if")
+                    print(daily_EWCT)
+                    print(daily_NSCT)
                     daily_dict[dict_key] = {
                         'datetime': daily_times, 'velocity': daily_velocities, 'direction': daily_directions, 'EWCT': daily_EWCT, 'NSCT': daily_NSCT}
                 else:
@@ -176,15 +179,32 @@ def main(args):
         fig, (ax1, ax2, ax3) = plt.subplots(3)
         fig.subplots_adjust(hspace=1)
         fig.suptitle('Mooring: {}'.format(dict_key))
+        max_value = max(dict_speed[dict_key]['velocity'][:])
+        min_value = min(dict_speed[dict_key]['velocity'][:])
         ax1.plot(dict_speed[dict_key]['datetime'][:],
                  dict_speed[dict_key]['velocity'][:])
         ax1.tick_params(axis='x', rotation=45, labelsize=7)
+        ax1.set_title('Original Velocity Time Series')
+        ax1.grid()
         ax2.plot(removed_outliers_dict[dict_key]['datetime']
                  [:], removed_outliers_dict[dict_key]['velocity'][:])
         ax2.tick_params(axis='x', rotation=45, labelsize=7)
+        ax2.set_title('Velocity Time Series (no outliers)')
+        ax2.grid()
         ax3.plot(daily_dict_value['datetime'][:],
                  daily_dict_value['velocity'][:])
         ax3.tick_params(axis='x', rotation=45, labelsize=7)
+        ax3.set_title('Averaged velocity timeseries (no outliers)')
+        ax3.grid()
+        # Optional padding
+        padding = 0.01  # 10% padding
+
+        # Calculate the y-axis limits
+        y_min = min_value - padding
+        y_max = max_value + padding
+        ax1.set_ylim(y_min, y_max)
+        ax2.set_ylim(y_min, y_max)
+        ax3.set_ylim(y_min, y_max)
         filename = dict_key + '_plot_speed_ts.png'
         fig.savefig(path_to_plot_ts + filename)
 
@@ -194,13 +214,18 @@ def main(args):
         ax1_dir.plot(dict_speed[dict_key]['datetime'][:],
                      dict_speed[dict_key]['direction'][:])
         ax1_dir.tick_params(axis='x', rotation=45, labelsize=7)
+        ax1_dir.set_title('Original Direction Time Series')
+        ax1_dir.grid()
         ax2_dir.plot(daily_dict_value['datetime']
                      [:], daily_dict_value['direction'][:])
         ax2_dir.tick_params(axis='x', rotation=45, labelsize=7)
+        ax2_dir.set_title('Averaged Direction Time Series')
+        ax2_dir.grid()
         filename = dict_key + '_plot_dir_ts.png'
         fig_dir.savefig(path_to_plot_ts + filename)
 
-        if np.size(dict_value['EWCT'][:]) > 0 and np.size(dict_value['NSCT'][:]) > 0:
+        if "EWCT" in daily_dict_value:
+            print("if pt 2")
             obs_ds = xr.Dataset(data_vars=dict(TIME=(['TIME'], daily_dict_value['datetime'][:]), vel=(
                 ['TIME'], daily_dict_value['velocity'][:]), dir=(
                 ['TIME'], daily_dict_value['direction'][:]), EWCT=(
