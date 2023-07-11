@@ -1,0 +1,2 @@
+# last latitude ; last longitude ; num of vlevs ; num of sfc vlevs ; name ; CMEMS code ; WMO code; time period; fields list ; quality flag value ; obs path tpl / name tpl ; 
+45.5488;13.550525;24;5;_;VIDA;6101630;2015-01-01,2022-01-23;EWCT,NSCT;1;/work/oda/mg28621/prova_destag/surface_insitu_validation/vida_no_duplicates.nc;

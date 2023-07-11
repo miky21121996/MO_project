@@ -1,4 +1,4 @@
-from core_plot import plot_mod_obs_ts_diff_comparison, plot_mod_obs_ts_comparison, plot_mod_obs_ECDF_comparison, plot_bias_rmse_ts ,plot_windrose, plot_tot_mod_obs_ECDF_comparison, plot_bias_ts_comparison, plot_rmse_ts_comparison, append_value, srl, TaylorDiagram, append_value, Get_String_Time_Resolution, scatterPlot, daterange, mapping, line_A, BIAS, RMSE, ScatterIndex, Normalized_std, mscatter
+from core_plot import plot_mod_obs_ts_diff_comparison, plot_mod_obs_ts_comparison, plot_mod_obs_ECDF_comparison, plot_bias_rmse_ts, plot_windrose, plot_tot_mod_obs_ECDF_comparison, plot_bias_ts_comparison, plot_rmse_ts_comparison, append_value, srl, TaylorDiagram, append_value, Get_String_Time_Resolution, scatterPlot, daterange, mapping, line_A, BIAS, RMSE, ScatterIndex, Normalized_std, mscatter
 import skill_metrics as sm
 from windrose import WindroseAxes
 from datetime import date
@@ -168,7 +168,8 @@ def main(args):
         ymin[name_stat]["mooring"], ymax[name_stat]["mooring"] = ax.get_ylim()
         #plot_windrose(a[~np.isnan(a)],b[~np.isnan(a)],min_mooring_vel[name_stat], max_mooring_vel[name_stat],date_in,date_fin,name_file_substring,title_substring,path_to_comparison)
 
-    plot_tot_mod_obs_ECDF_comparison(date_in, date_fin, time_res_arr, vel_mod_ts, vel_obs_ts, label_plot_arr, path_to_comparison, '_mod_obs_ECDF_comparison.png')
+    plot_tot_mod_obs_ECDF_comparison(date_in, date_fin, time_res_arr, vel_mod_ts,
+                                     vel_obs_ts, label_plot_arr, path_to_comparison, '_mod_obs_ECDF_comparison.png')
 
     bias_ts = {}
     diff_q_ts = {}
@@ -235,23 +236,39 @@ def main(args):
             b = vel_obs_ts[name_stat]
             a = a[~np.isnan(b)]
             b = b[~np.isnan(b)]
+            print("taylor mod: ", a[~np.isnan(a)])
+            print(a[~np.isnan(a)].shape)
+            print("taylor mod: ", b[~np.isnan(a)])
+            print(b[~np.isnan(a)].shape)
+
             taylor_stats = sm.taylor_statistics(
                 a[~np.isnan(a)], b[~np.isnan(a)])
 
             if exp == 0:
                 sdev[name_stat] = list(
                     np.around(np.array([taylor_stats['sdev'][0], taylor_stats['sdev'][1]]), 4))
+                print("sdev: ", taylor_stats['sdev'][0])
+                print("sdev: ", taylor_stats['sdev'][1])
                 crmsd[name_stat] = list(
                     np.around(np.array([taylor_stats['crmsd'][0], taylor_stats['crmsd'][1]]), 4))
+                print("crmsd: ", taylor_stats['crmsd'][0])
+                print("crmsd: ", taylor_stats['crmsd'][1])
                 ccoef[name_stat] = list(
                     np.around(np.array([taylor_stats['ccoef'][0], taylor_stats['ccoef'][1]]), 4))
+                print("ccoef: ", taylor_stats['ccoef'])
+                print("ccoef: ", taylor_stats['ccoef'][0])
+                print("ccoef: ", taylor_stats['ccoef'][1])
             else:
                 append_value(sdev, name_stat, round(
                     taylor_stats['sdev'][1], 4))
+                print("sdev: ", taylor_stats['sdev'][1])
                 append_value(crmsd, name_stat, round(
                     taylor_stats['crmsd'][1], 4))
+                print("crmsd: ", taylor_stats['crmsd'][1])
                 append_value(ccoef, name_stat, round(
                     taylor_stats['ccoef'][1], 4))
+                print("ccoef: ", taylor_stats['ccoef'])
+                print("ccoef: ", taylor_stats['ccoef'][1])
 
         #os.makedirs(output_plot_folder_comparison, exist_ok=True)
         obsSTD = [sdev[name_stat][0]]
@@ -353,8 +370,6 @@ def main(args):
             onlyfiles_mod), timerange.shape[0], possible_markers, moor_names, possible_colors, string_time_res, len_not_nan_values=len_not_nan_values, title=title, xlabel=xlabel, ylabel=ylabel)
         row_all = mean_all + statistics_array
         statistics[exp]["ALL BUOYS"] = row_all
-        
-        
 
         a_file = open(path_to_output_experiments_arr[exp] + "statistics_" +
                       label_plot_arr[exp] + "_" + date_in + "_" + date_fin + ".csv", "w")

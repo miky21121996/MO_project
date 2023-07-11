@@ -131,7 +131,7 @@ def plot_mod_obs_ECDF_comparison(ii, name_stat, date_in, date_fin, time_res, obs
 
 
 def plot_windrose(direction, velocity, minimum, maximum, date_in, date_fin, name_file_substring, title_substring, output_plot_folder, ymin, ymax):
-    plotname = date_in + '_' + date_fin + '_' + name_file_substring + '.png'
+    plotname = date_in + '_' + date_fin + name_file_substring + '.png'
     fig = plt.figure()
     #plt.rc('font', size=24)
     rect = [0.1, 0.1, 0.8, 0.8]
@@ -143,7 +143,7 @@ def plot_windrose(direction, velocity, minimum, maximum, date_in, date_fin, name
         minimum, maximum, 5), opening=0.8, edgecolor='white', cmap=turbo)
     # set the y-axis tick positions
     ax.set_yticks(np.linspace(ymin, ymax, 5))
-    ax.set_yticklabels(['{:.2f}'.format(x)
+    ax.set_yticklabels(['{:.2f} %'.format(x)
                        for x in np.linspace(ymin, ymax, 5)], fontsize=12)
     # Set the y-axis tick format to percentage
     # ax.yaxis.set_major_formatter(plt.PercentFormatter())
@@ -206,11 +206,17 @@ def plot_bias_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, bi
     plt.rc('font', size=8)
     plt.title('Surface (3m) Current Velocity BIAS -ALL: \n Period: ' +
               date_in + '-' + date_fin, fontsize=29)
+    maximum = 0
+    minimum = 0
     for exp in range(len(name_exp)):
+        maximum = max(maximum, np.nanmax(list(bias_ts[exp].values())))
+        minimum = min(minimum, np.nanmin(list(bias_ts[exp].values())))
         ax1.plot(timerange, list(bias_ts[exp].values()), label=name_exp[exp]+' : {} m/s'.format(
             round(np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3)
     ax1.axhline(y=0, color='k', linestyle='--')
     ax1.tick_params(axis='y', labelsize=26)
+    winner = max(abs(maximum), abs(minimum))
+    ax1.set_ylim(-winner, winner)
     if time_res_xaxis[1] == 'd':
         ax1.xaxis.set_major_locator(
             mdates.DayLocator(interval=int(time_res_xaxis[0])))
@@ -562,6 +568,10 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
     ax.tick_params(axis='both', labelsize=12.5)
 
     bias = BIAS(y, x)
+    print("x: ", x)
+    print(x.shape)
+    print("y: ", y)
+    print(y.shape)
     corr, _ = pearsonr(x, y)
     rmse = RMSE(y, x)
     nstd = Normalized_std(y, x)
