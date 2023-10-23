@@ -100,6 +100,7 @@ def main(args):
     dict_speed = {}
     for index, row in df.iterrows():
         ds = xr.open_dataset(df[path_to_obs_file][index])
+        print("TIME: ", ds.TIME)
         ds_restricted = ds.sel(TIME=slice(date_in, date_fin))
         mask_depth = Mask_For_Depth(ds_restricted)
         times, speed_values, dir_values, EWCT_values, NSCT_values = Check_Quality_and_Filter(
@@ -122,7 +123,8 @@ def main(args):
                     selected_name_end = item
         else:
             selected_name_end = selected_name.values[0]
-
+        print(selected_name_end)
+        print(times)
         dict_speed[selected_name_end] = {
             'datetime': times, 'velocity': speed_values, 'direction': dir_values, 'EWCT': EWCT_values, 'NSCT': NSCT_values}
 
@@ -179,8 +181,8 @@ def main(args):
         fig, (ax1, ax2, ax3) = plt.subplots(3)
         fig.subplots_adjust(hspace=1)
         fig.suptitle('Mooring: {}'.format(dict_key))
-        max_value = max(dict_speed[dict_key]['velocity'][:])
-        min_value = min(dict_speed[dict_key]['velocity'][:])
+        max_value = np.nanmax(dict_speed[dict_key]['velocity'][:])
+        min_value = np.nanmin(dict_speed[dict_key]['velocity'][:])
         ax1.plot(dict_speed[dict_key]['datetime'][:],
                  dict_speed[dict_key]['velocity'][:])
         ax1.tick_params(axis='x', rotation=45, labelsize=7)

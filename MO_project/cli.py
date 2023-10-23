@@ -57,6 +57,7 @@ class Configuration:
         self.time_res_axis = config['plot_statistics_section']['time_res_axis']
         self.path_to_output_exp = config['plot_statistics_section']['path_to_exp'].split(',')
         self.path_to_comparison = config['plot_statistics_section']['path_to_comparison']
+        self.path_to_accepted_metadata_obs_file_for_plot = config['plot_statistics_section']['path_to_accepted_metadata_obs_file']
         
         
 def parse():

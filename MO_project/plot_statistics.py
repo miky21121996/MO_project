@@ -1,4 +1,4 @@
-from core_plot import plot_mod_obs_ts_diff_comparison, plot_mod_obs_ts_comparison, plot_mod_obs_ECDF_comparison, plot_bias_rmse_ts, plot_windrose, plot_tot_mod_obs_ECDF_comparison, plot_bias_ts_comparison, plot_rmse_ts_comparison, append_value, srl, TaylorDiagram, append_value, Get_String_Time_Resolution, scatterPlot, daterange, mapping, line_A, BIAS, RMSE, ScatterIndex, Normalized_std, mscatter
+from core_plot import plot_mod_obs_ts_diff_comparison, plot_mod_obs_ts_comparison, plot_mod_obs_ECDF_comparison, plot_bias_rmse_ts, plot_windrose, plot_tot_mod_obs_ECDF_comparison, plot_bias_ts_comparison, plot_rmse_ts_comparison, append_value, srl, TaylorDiagram, append_value, Get_String_Time_Resolution, scatterPlot, daterange, mapping, QQPlot
 import skill_metrics as sm
 from windrose import WindroseAxes
 from datetime import date
@@ -63,6 +63,7 @@ def main(args):
     # n_time_instants=len(list(daterange(start_date,end_date)))
 
     obs_file = {}
+    print("obs_file: ", path_to_accepted_metadata_obs_file)
     with open(path_to_accepted_metadata_obs_file) as f:
         reader = csv.reader(f, delimiter=';')
         next(reader)
@@ -89,7 +90,7 @@ def main(args):
                 start_date, end_date, freq=time_res_arr[i][1]) - pd.DateOffset(days=15)
         elif time_res_arr[i][1] == 'D':
             timerange = pd.date_range(
-                start_date, end_date, freq=time_res_arr[i][1]) - pd.DateOffset(hours=12)
+                start_date, end_date, freq=time_res_arr[i][1]) + pd.DateOffset(hours=12)
 
         onlyfiles_mod = [f for f in sorted(
             listdir(mod_folder)) if isfile(join(mod_folder, f))]
@@ -281,6 +282,7 @@ def main(args):
         srl(obsSTD, s, r, l, fname, markers, path_to_comparison)
 
     statistics = {}
+    qq_statistics = {}
     possible_colors = ['red', 'blue', 'black', 'green',
                        'purple', 'orange', 'brown', 'pink', 'grey', 'olive']
     possible_markers = np.array(["o", "^", "s", "P", "*", "+"])
@@ -288,13 +290,14 @@ def main(args):
         start_date, end_date, time_res_arr[0])
     for exp in range(len(label_plot_arr)):
         statistics[exp] = {}
+        qq_statistics[exp] = {}
         len_not_nan_values = []
         moor_names = []
         for counter, (key_obs_file, name_stat) in enumerate(zip(sorted(obs_file.keys()), vel_mod_ts[exp].keys())):
 
             plotname = label_plot_arr[exp] + '_' + name_stat + '_' + \
                 date_in + '_' + date_fin + '_' + \
-                time_res_arr[exp] + '_qqPlot.png'
+                time_res_arr[exp] + '_scatterPlot.png'
             title = 'Surface (3m) Current Velocity ' + name_stat + '\n (' + \
                 obs_file[key_obs_file]['lat'] + ', ' + obs_file[key_obs_file]['lon'] + \
                     ') Period: ' + date_in + ' - ' + date_fin
@@ -315,6 +318,23 @@ def main(args):
             row_stat = tot_mean_stat + statistics_array
             statistics[exp][name_stat] = row_stat
 
+            plotname = label_plot_arr[exp] + '_' + name_stat + '_' + \
+                date_in + '_' + date_fin + '_' + \
+                time_res_arr[exp] + '_qqPlot.png'
+            title = 'Surface (3m) Current Velocity ' + name_stat + '\n (' + \
+                obs_file[key_obs_file]['lat'] + ', ' + obs_file[key_obs_file]['lon'] + \
+                    ') Period: ' + date_in + ' - ' + date_fin
+            xlabel = 'Observation Current Velocity [m/s]'
+            ylabel = 'Model Current Velocity [m/s]'
+            qq_statistics_array = QQPlot(np.array(vel_mod_ts[exp][name_stat]), np.array(
+                vel_obs_ts[name_stat]), path_to_output_experiments_arr[exp] + plotname, label_plot_arr[exp], title=title, xlabel=xlabel, ylabel=ylabel)
+            mean_vel_mod = round(np.nanmean(
+                np.array(vel_mod_ts[exp][name_stat])), 2)
+            mean_vel_obs = round(np.nanmean(
+                np.array(vel_obs_ts[name_stat])), 2)
+            tot_mean_stat = [mean_vel_mod, mean_vel_obs]
+            row_stat = tot_mean_stat + qq_statistics_array
+            qq_statistics[exp][name_stat] = row_stat
             #min_model_vel = min(np.nanmin(vel_mod_ts[exp][name_stat]),np.nanmin(vel_obs_ts[name_stat]))
             #max_model_vel = max(np.nanmax(vel_mod_ts[exp][name_stat]),np.nanmax(vel_obs_ts[name_stat]))
             name_file_substring = "_" + \
@@ -361,7 +381,7 @@ def main(args):
         mean_all = [tot_mean_mod, tot_mean_obs]
 
         plotname = label_plot_arr[exp] + '_' + date_in + '_' + \
-            date_fin + '_' + time_res_arr[exp] + '_qqPlot.png'
+            date_fin + '_' + time_res_arr[exp] + '_scatterPlot.png'
         title = 'Surface (3m) Current Velocity -ALL \n Period: ' + \
             date_in + '-' + date_fin
         xlabel = 'Observation Current Velocity [m/s]'
@@ -371,12 +391,34 @@ def main(args):
         row_all = mean_all + statistics_array
         statistics[exp]["ALL BUOYS"] = row_all
 
+        plotname = label_plot_arr[exp] + '_' + date_in + '_' + \
+            date_fin + '_' + time_res_arr[exp] + '_qqPlot.png'
+        title = 'Surface (3m) Current Velocity -ALL \n Period: ' + \
+            date_in + '-' + date_fin
+        xlabel = 'Observation Current Velocity [m/s]'
+        ylabel = 'Model Current Velocity [m/s]'
+        qq_statistics_array = QQPlot(
+            mod_array, obs_array, path_to_output_experiments_arr[exp] + plotname, label_plot_arr[exp], title=title, xlabel=xlabel, ylabel=ylabel)
+        row_all = mean_all + statistics_array
+        qq_statistics[exp]["ALL BUOYS"] = row_all
+
         a_file = open(path_to_output_experiments_arr[exp] + "statistics_" +
                       label_plot_arr[exp] + "_" + date_in + "_" + date_fin + ".csv", "w")
         writer = csv.writer(a_file)
         writer.writerow(["name_station", "mean_mod", "mean_obs",
                         "bias", "rmse", "si", "corr", "stderr", "number_of_obs"])
         for key, value in statistics[exp].items():
+            array = [key] + value
+            print(array)
+            writer.writerow(array)
+        a_file.close()
+
+        a_file = open(path_to_output_experiments_arr[exp] + "qq_statistics_" +
+                      label_plot_arr[exp] + "_" + date_in + "_" + date_fin + ".csv", "w")
+        writer = csv.writer(a_file)
+        writer.writerow(["name_station", "mean_mod", "mean_obs",
+                        "bias", "rmse", "si", "corr", "stderr", "number_of_obs"])
+        for key, value in qq_statistics[exp].items():
             array = [key] + value
             print(array)
             writer.writerow(array)

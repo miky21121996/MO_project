@@ -17,47 +17,59 @@ def Link_Files(paths, old_names, new_names, date_in, date_fin, time_res, out_pat
     for path in out_paths:
         os.makedirs(path, exist_ok=True)
     # Remove all files in the directory if it already exists
-        for filename in os.listdir(path):
-            file_path = os.path.join(path, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-            except Exception as e:
-                print(f"Failed to delete {file_path}. Reason: {e}")
+    #    for filename in os.listdir(path):
+    #        file_path = os.path.join(path, filename)
+    #        try:
+    #            if os.path.isfile(file_path) or os.path.islink(file_path):
+    #                os.unlink(file_path)
+    #        except Exception as e:
+    #            print(f"Failed to delete {file_path}. Reason: {e}")
 
     while current_date <= date_fin:
         print(current_date)
         # Loop through paths
         for i, path in enumerate(paths):
             # Find files
-            # for root, dirs, files in os.walk(path):
-            for file in glob.glob(path + "/" + current_date.strftime("%Y%m%d") + "/model/*"):
-                # for file in files:
-                u_file = None
-                v_file = None
-                if old_names[i] in file and time_res[i] in file and current_date.strftime('%Y%m%d') in file:
-                    print(file)
-                    if 'U' in file:
-                        #u_file = os.path.join(root, file)
-                        u_file = file
-                    elif 'V' in file:
-                        #v_file = os.path.join(root, file)
-                        v_file = file
+            for root, dirs, files in os.walk(path):
+            #for file in glob.glob(path + "/" + current_date.strftime("%Y%m%d") + "/model/*"):
+                for file in files:
+                    u_file = None
+                    v_file = None
+                    t_file = None
+                    if old_names[i] in file and time_res[i] in file and current_date.strftime('%Y%m%d') in file:
+                        print(file)
+                        if 'U' in file:
+                            u_file = os.path.join(root, file)
+                            #u_file = file
+                        elif 'V' in file:
+                            v_file = os.path.join(root, file)
+                            #v_file = file
+                        elif 'T' in file:
+                            t_file = os.path.join(root, file)
+                            #t_file = file
 
-                # Link files to output folder
-                    if u_file is not None and v_file is not None:
-                        os.symlink(u_file, os.path.join(
-                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
-                        os.symlink(v_file, os.path.join(
-                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
-                    elif u_file is not None and 'U' in u_file:
-                        os.symlink(u_file, os.path.join(
-                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
-                    elif v_file is not None and 'V' in v_file:
-                        os.symlink(v_file, os.path.join(
-                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
+                    # Link files to output folder
+                        if u_file is not None and v_file is not None and t_file is not None:
+                            os.symlink(u_file, os.path.join(
+                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
+                            os.symlink(v_file, os.path.join(
+                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
+                            # os.symlink(t_file, os.path.join(
+                            #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
+                        elif u_file is not None and 'U' in u_file:
+                            print('ciao')
+                            os.symlink(u_file, os.path.join(
+                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
+                        elif v_file is not None and 'V' in v_file:
+                            print('ciao')
+                            os.symlink(v_file, os.path.join(
+                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
+                        elif t_file is not None and 'T' in t_file:
+                            print('ciao oh')
+                            # os.symlink(t_file, os.path.join(
+                            #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
 
-        # Increment date
+                        # Increment date
         current_date += datetime.timedelta(days=1)
 
 
@@ -161,7 +173,7 @@ def Filter_Data(start_date, end_date, obs_file_path, path_to_accepted_metadata_o
     removed_data = pd.DataFrame({})
     removed_data['removal_reasons'] = removed_data_reasons
 
-    #removed_data = removed_data.apply(lambda x: x.str.strip('"'))
+    # removed_data = removed_data.apply(lambda x: x.str.strip('"'))
     removed_data.to_csv("./removed_data.csv", sep=';', index=False)
 
     # save filtered data to new csv file
@@ -270,7 +282,7 @@ def Check_Quality_and_Filter(dataset, dataframe, quality_flag, mask_depth):
                     dir_values.append(np.nan)
                 else:
                     values.append(
-                        np.sqrt(value_ewct[0] ^ 2 + value_nsct[0] ^ 2))
+                        np.sqrt(value_ewct[0] ** 2 + value_nsct[0] ** 2))
                     dir_values.append(wind_direction(
                         value_ewct[0], value_nsct[0]))
 
@@ -372,8 +384,8 @@ def Remove_Outliers(dict_speed):
 
         mean_NSCT_value = np.nanmean(dict_value['NSCT'][:])
         sd_NSCT_value = np.nanstd(dict_value['NSCT'][:])
-        #mean_dir_value = np.nanmean(dict_value['direction'][:])
-        #sd_dir_value = np.nanstd(dict_value['direction'][:])
+        # mean_dir_value = np.nanmean(dict_value['direction'][:])
+        # sd_dir_value = np.nanstd(dict_value['direction'][:])
         update_velocity[dict_key] = {'datetime': dict_value['datetime'], 'velocity': np.where((dict_value['velocity'] > (mean_value+2*sd_value)) | (
             dict_value['velocity'] < (mean_value-2*sd_value)), np.nan, dict_value['velocity']), 'EWCT': np.where((dict_value['EWCT'] > (mean_EWCT_value+2*sd_EWCT_value)) | (
                 dict_value['EWCT'] < (mean_EWCT_value-2*sd_EWCT_value)), np.nan, dict_value['EWCT']), 'NSCT': np.where((dict_value['NSCT'] > (mean_NSCT_value+2*sd_NSCT_value)) | (
@@ -644,7 +656,7 @@ def Find_Nearest_Mod_Point(obs_file, ini_date, name_exp, time_res, path_to_desta
                      U_current.depthu.values[idx_near_obs_depth])
 
         nearest_point[name] = {'lon_idx': i, 'lat_idx': j, 'depth_idx': k}
-        #print("nearest point: ",nearest_point[name])
+        # print("nearest point: ",nearest_point[name])
         U_current.close()
 
     return nearest_point

@@ -58,7 +58,10 @@ def plot_mod_obs_ts_diff_comparison(name_stat, date_in, date_fin, time_res, obs_
     fig.autofmt_xdate()
     plt.ylabel('Velocity Difference [m/s]', fontsize=40)
     plt.xlabel('Date', fontsize=40)
-    plt.legend(prop={'size': 20}, framealpha=0.2)
+    legend = plt.legend(prop={'size': 20}, framealpha=0.2)
+    frame = legend.get_frame()
+    frame.set_linewidth(5)  # Set the width of the legend box border
+    frame.set_edgecolor('black')
     plt.savefig(path_to_output_plot_folder + plotname)
     plt.clf()
 
@@ -66,8 +69,9 @@ def plot_mod_obs_ts_diff_comparison(name_stat, date_in, date_fin, time_res, obs_
 def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file, key_obs_file, vel_mod_ts, vel_obs_ts, name_exp, timerange, time_res_xaxis, path_to_output_plot_folder):
     plotname = name_stat + '_' + date_in + '_' + date_fin + \
         '_' + time_res[0] + '_mod_obs_ts_comparison.png'
-    fig = plt.figure(figsize=(18, 12))
+    fig = plt.figure(figsize=(20, 10))
     ax = fig.add_subplot(111)
+    color_list = ['blue', 'red']
     plt.rc('font', size=24)
     plt.title('Surface (3m) Current Velocity: ' + name_stat + ' (' +
               obs_file[key_obs_file]['lat'] + ', ' + obs_file[key_obs_file]['lon'] + ') \n Period: ' + date_in + '-' + date_fin, fontsize=29)
@@ -75,12 +79,19 @@ def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file,
         mean_vel_mod = round(np.nanmean(
             np.array(vel_mod_ts[exp][name_stat])), 2)
         plt.plot(timerange, vel_mod_ts[exp][name_stat],
-                 label=name_exp[exp] + ' : '+str(mean_vel_mod)+' m/s', linewidth=2)
+                 label=name_exp[exp] + ' : '+str(mean_vel_mod)+' m/s', linewidth=2, color=color_list[exp])
     mean_vel_obs = round(np.nanmean(np.array(vel_obs_ts[name_stat])), 2)
+    print('TIMERANGE: ', timerange)
+    print(len(vel_obs_ts[name_stat]))
+    print(len(vel_mod_ts[exp][name_stat]))
     plt.plot(timerange, vel_obs_ts[name_stat],
-             label='Observation : '+str(mean_vel_obs)+' m/s', linewidth=2)
+             label='Observation : '+str(mean_vel_obs)+' m/s', linewidth=2, color='green')
     plt.grid()
     ax.tick_params(axis='both', labelsize=26)
+    buffer = 0.01 * (timerange[-1] - timerange[0])
+
+# Set the x-axis limits to include the buffer
+    ax.set_xlim(timerange[0] - buffer, timerange[-1] + buffer)
     if time_res_xaxis[1] == 'd':
         ax.xaxis.set_major_locator(
             mdates.DayLocator(interval=int(time_res_xaxis[0])))
@@ -101,7 +112,10 @@ def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file,
     fig.autofmt_xdate()
     plt.ylabel('Velocity [m/s]', fontsize=40)
     plt.xlabel('Date', fontsize=40)
-    plt.legend(prop={'size': 30}, framealpha=0.2)
+    legend = plt.legend(prop={'size': 30}, framealpha=0.2)
+    frame = legend.get_frame()
+    frame.set_linewidth(5)  # Set the width of the legend box border
+    frame.set_edgecolor('black')
     plt.savefig(path_to_output_plot_folder + plotname)
     plt.clf()
 
@@ -119,12 +133,18 @@ def plot_mod_obs_ECDF_comparison(ii, name_stat, date_in, date_fin, time_res, obs
     plt.xlabel('velocity [m/s]', fontsize=40)
     plt.ylabel('ECDF', fontsize=40)
 
+    color_list = ['blue', 'red']
+
     ecdf_obs = ECDF(np.array(vel_obs_ts[name_stat][ii]))
     plt.axhline(y=0.5, color='black', linestyle="dashed")
     for exp in range(len(name_exp)):
+        print(exp)
+        print("nan values: ", np.array(vel_mod_ts[exp][name_stat][ii]))
         ecdf_mod = ECDF(np.array(vel_mod_ts[exp][name_stat][ii]))
-        plt.plot(ecdf_mod.x, ecdf_mod.y, label=name_exp[exp], linewidth=4)
-    plt.plot(ecdf_obs.x, ecdf_obs.y, label="observation", linewidth=4)
+        plt.plot(ecdf_mod.x, ecdf_mod.y,
+                 label=name_exp[exp], linewidth=4, color=color_list[exp])
+    plt.plot(ecdf_obs.x, ecdf_obs.y, label="observation",
+             linewidth=4, color='green')
     plt.legend(loc='lower right', prop={'size': 40})
     plt.savefig(path_to_output_plot_folder + plotname)
     plt.clf()
@@ -155,7 +175,12 @@ def plot_windrose(direction, velocity, minimum, maximum, date_in, date_fin, name
 
     ax.set_title(title_substring+':' + '\n Period: ' +
                  date_in + '-' + date_fin, fontsize=12)
-    ax.set_legend(loc=4, bbox_to_anchor=(1., -0.07))
+    #ax.set_legend(loc='best', bbox_to_anchor=(1., -0.07),)
+    legend = ax.set_legend(loc=4, bbox_to_anchor=(
+        1., -0.07), prop={'size': 23}, framealpha=0.3)
+
+    for i, label in enumerate(legend.get_texts()):
+        label.set_text(label.get_text() + ' m/s')
     plt.savefig(output_plot_folder + plotname, bbox_inches=None)
     plt.close()
 
@@ -172,6 +197,8 @@ def plot_tot_mod_obs_ECDF_comparison(date_in, date_fin, time_res, vel_mod_ts, ve
     plt.ylabel('ECDF', fontsize=40)
     plt.axhline(y=0.5, color='black', linestyle="dashed")
 
+    color_list = ['blue', 'red']
+
     for exp in range(len(name_exp)):
         mod_array = np.array([])
         if exp == 0:
@@ -186,9 +213,11 @@ def plot_tot_mod_obs_ECDF_comparison(date_in, date_fin, time_res, vel_mod_ts, ve
         ecdf_obs = ECDF(obs_array)
         ecdf_mod = ECDF(mod_array)
 
-        plt.plot(ecdf_mod.x, ecdf_mod.y, label=name_exp[exp], linewidth=4)
+        plt.plot(ecdf_mod.x, ecdf_mod.y,
+                 label=name_exp[exp], linewidth=4, color=color_list[exp])
 
-    plt.plot(ecdf_obs.x, ecdf_obs.y, label="observation", linewidth=4)
+    plt.plot(ecdf_obs.x, ecdf_obs.y, label="observation",
+             linewidth=4, color='green')
     ax.tick_params(axis='both', labelsize=26)
     plt.legend(loc='lower right', prop={'size': 40})
     plt.savefig(path_to_output_plot_folder + plotname)
@@ -203,20 +232,34 @@ def plot_bias_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, bi
     ax1 = fig.add_subplot(111)
     ax1.set_xlabel('Date', fontsize=40)
     ax1.set_ylabel('BIAS [m/s]', fontsize=40)
+
+    color_list = ['blue', 'red']
     plt.rc('font', size=8)
     plt.title('Surface (3m) Current Velocity BIAS -ALL: \n Period: ' +
               date_in + '-' + date_fin, fontsize=29)
     maximum = 0
     minimum = 0
     for exp in range(len(name_exp)):
-        maximum = max(maximum, np.nanmax(list(bias_ts[exp].values())))
-        minimum = min(minimum, np.nanmin(list(bias_ts[exp].values())))
-        ax1.plot(timerange, list(bias_ts[exp].values()), label=name_exp[exp]+' : {} m/s'.format(
-            round(np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3)
+        #maximum = max(maximum, np.nanmax(list(bias_ts[exp].values())))
+        minimum = -max(maximum, np.nanmax(list(bias_ts[exp].values())))
+        #minimum = min(minimum, np.nanmin(list(bias_ts[exp].values())))
+        maximum = -min(minimum, np.nanmin(list(bias_ts[exp].values())))
+        values = bias_ts[exp].values()
+        negated_values = [-x for x in values]  # Negate each value in the list
+        # ax1.plot(timerange, list(bias_ts[exp].values()), label=name_exp[exp]+' : {} m/s'.format(
+        #    round(-np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3, color=color_list[exp])
+        ax1.plot(timerange, negated_values, label=name_exp[exp]+' : {} m/s'.format(
+            round(-np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3, color=color_list[exp])
     ax1.axhline(y=0, color='k', linestyle='--')
     ax1.tick_params(axis='y', labelsize=26)
     winner = max(abs(maximum), abs(minimum))
     ax1.set_ylim(-winner, winner)
+# Calculate a small buffer for the x-axis limits
+    # You can adjust the buffer percentage as needed
+    buffer = 0.01 * (timerange[-1] - timerange[0])
+
+# Set the x-axis limits to include the buffer
+    ax1.set_xlim(timerange[0] - buffer, timerange[-1] + buffer)
     if time_res_xaxis[1] == 'd':
         ax1.xaxis.set_major_locator(
             mdates.DayLocator(interval=int(time_res_xaxis[0])))
@@ -226,9 +269,11 @@ def plot_bias_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, bi
             mdates.WeekdayLocator(interval=int(time_res_xaxis[0])))
         ax1.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
     if time_res_xaxis[1] == 'm':
+        print('ciao')
         ax1.xaxis.set_major_locator(
             mdates.MonthLocator(interval=int(time_res_xaxis[0])))
         ax1.xaxis.set_major_formatter(mdates.DateFormatter('%m-%Y'))
+
     if time_res_xaxis[1] == 'y':
         ax1.xaxis.set_major_locator(
             mdates.YearLocator(interval=int(time_res_xaxis[0])))
@@ -245,7 +290,10 @@ def plot_bias_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, bi
     # ax1.set_yticks([0])
     ax1.grid('on')
 
-    ax1.legend(loc='upper left',  prop={'size': 20}, framealpha=0.2)
+    legend = ax1.legend(loc='upper left',  prop={'size': 20}, framealpha=0.2)
+    frame = legend.get_frame()
+    frame.set_linewidth(5)  # Set the width of the legend box border
+    frame.set_edgecolor('black')
     plt.savefig(path_to_output_plot_folder + plotname,
                 dpi=300, bbox_inches="tight")
     plt.clf()
@@ -314,14 +362,19 @@ def plot_rmse_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, rm
     ax1 = fig.add_subplot(111)
     ax1.set_xlabel('Date', fontsize=40)
     ax1.set_ylabel('RMSD [m/s]', fontsize=40)
+    color_list = ['blue', 'red']
     plt.rc('font', size=8)
     plt.title('Surface (3m) Current Velocity RMSD -ALL: \n Period: ' +
               date_in + '-' + date_fin, fontsize=29)
+    buffer = 0.01 * (timerange[-1] - timerange[0])
+
+# Set the x-axis limits to include the buffer
+    ax1.set_xlim(timerange[0] - buffer, timerange[-1] + buffer)
+
     for exp in range(len(name_exp)):
         ax1.plot(timerange, np.sqrt(list(rmsd_ts[exp].values())), label=name_exp[exp] + ' : {} m/s'.format(
-            round(math.sqrt(np.nanmean(np.array(list(rmsd_ts[exp].values())))), 2)), linewidth=3)
+            round(math.sqrt(np.nanmean(np.array(list(rmsd_ts[exp].values())))), 2)), linewidth=3, color=color_list[exp])
     ax1.tick_params(axis='y', labelsize=26)
-
     if time_res_xaxis[1] == 'd':
         ax1.xaxis.set_major_locator(
             mdates.DayLocator(interval=int(time_res_xaxis[0])))
@@ -349,7 +402,10 @@ def plot_rmse_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, rm
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%0.2f'))
     ax1.grid('on')
 
-    ax1.legend(loc='upper left',  prop={'size': 20}, framealpha=0.2)
+    legend = ax1.legend(loc='upper left',  prop={'size': 20}, framealpha=0.2)
+    frame = legend.get_frame()
+    frame.set_linewidth(5)  # Set the width of the legend box border
+    frame.set_edgecolor('black')
     plt.savefig(path_to_output_plot_folder + plotname,
                 dpi=300, bbox_inches="tight")
     plt.clf()
@@ -624,6 +680,91 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
     return stat_array
 
 
+def QQPlot(mod, obs, outname, name, **kwargs):
+
+    if np.isnan(obs).any() or np.isnan(mod).any():
+
+        obs_no_nan = obs[~np.isnan(obs) & ~np.isnan(mod)]
+        mod_no_nan = mod[~np.isnan(obs) & ~np.isnan(mod)]
+        xy = np.vstack([obs_no_nan, mod_no_nan])
+    else:
+        xy = np.vstack([obs, mod])
+
+    if np.isnan(obs).any() or np.isnan(mod).any():
+        x, y = obs_no_nan, mod_no_nan
+    else:
+        x, y = obs, mod
+
+    z = gaussian_kde(xy)(xy)
+    idx = z.argsort()
+    x, y, z = x[idx], y[idx], z[idx]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    im = ax.scatter(x, y, c=z, s=3, edgecolor=[], cmap='jet')
+
+    maxVal = np.nanmax((x, y))
+    ax.set_ylim(0, maxVal)
+    ax.set_xlim(0, maxVal)
+    ax.set_aspect(1.0)
+    ax.tick_params(axis='both', labelsize=12.5)
+
+    bias = BIAS(y, x)
+    corr, _ = pearsonr(x, y)
+    rmse = RMSE(y, x)
+    nstd = Normalized_std(y, x)
+    si = ScatterIndex(y, x)
+    slope, intercept, rvalue, pvalue, stderr = linregress(y, x)
+
+    prova = x[:, np.newaxis]
+    a, _, _, _ = np.linalg.lstsq(prova, y)
+    xseq = np.linspace(0, maxVal, num=100)
+    ax.plot(xseq, a*xseq, 'r-')
+    plt.text(0.001, 0.7, name, weight='bold',
+             transform=plt.gcf().transFigure, fontsize=13)
+
+    plt.text(0.01, 0.32, 'Entries: %s\n'
+             'BIAS: %s m/s\n'
+             'RMSD: %s m/s\n'
+             'NSTD: %s\n'
+             'SI: %s\n'
+             'corr:%s\n'
+             'Slope: %s\n'
+             'STDerr: %s m/s'
+             % (len(obs), bias, rmse, nstd, si, np.round(corr, 2),
+                np.round(a[0], 2), np.round(stderr, 2)), transform=plt.gcf().transFigure, fontsize=15)
+
+    stat_array = [bias, rmse, si, np.round(
+        corr, 2), np.round(stderr, 2), len(obs)]
+
+    if 'title' in kwargs:
+        plt.title(kwargs['title'], fontsize=15, x=0.5, y=1.01)
+
+    if 'xlabel' in kwargs:
+        plt.xlabel(kwargs['xlabel'], fontsize=18)
+
+    if 'ylabel' in kwargs:
+        plt.ylabel(kwargs['ylabel'], fontsize=18)
+
+    ax.plot([0, maxVal], [0, maxVal], c='k', linestyle='-.')
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ticks_1 = np.linspace(z.min(), z.max(), 5, endpoint=True)
+    cbar = plt.colorbar(im, fraction=0.02, ticks=ticks_1)
+    cbar.ax.set_yticklabels(['{:.1f}'.format(x) for x in ticks_1], fontsize=13)
+    cbar.set_label('probaility density [%]',
+                   rotation=270, size=18, labelpad=15)
+    #cbar = plt.colorbar(im, fraction=0.02)
+    #cbar.set_ticks([z.min(), z.max()])
+
+    plt.savefig(outname)
+    plt.close()
+    return stat_array
+
+
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days)+1):
         yield start_date + timedelta(n)
@@ -662,7 +803,7 @@ def mapping(obs_file, lat, lon, work_dir_plot):
 
     plt.legend(bbox_to_anchor=(0.5, -0.87),
                loc='lower center', prop={'size': 13})
-    plt.title('Location of accepted mooring', fontsize=25)
+    plt.title('Location of accepted moorings', fontsize=25)
     plt.savefig(work_dir_plot+'location.png')
 
 
@@ -671,7 +812,8 @@ def line_A(x, m_A, q_A):
 
 
 def BIAS(data, obs):
-    return np.round((np.nanmean(data-obs)).data, 2)
+    # return np.round((np.nanmean(data-obs)).data, 2)
+    return np.round((np.nanmean(obs-data)).data, 2)
 
 
 def RMSE(data, obs):

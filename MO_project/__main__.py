@@ -14,6 +14,7 @@ def main():
                    config.link_date_fin, config.time_res, config.out_paths)
 
     if args.destaggering:
+        # bsub -n 1 -q s_long -J CURVAL -e aderr_0 -o adout_0 -P 0510 -R rusage[mem=5G] MO_project --destaggering
         Destaggering(config.destag_date_in, config.destag_date_fin, config.input_paths,
                      config.path_to_out_destag_model_folder, config.exp_names, config.destag_time_res, config.mask_paths)
 
@@ -34,7 +35,7 @@ def main():
         subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'plot_statistics.py', config.plot_date_in, config.plot_date_fin, " ".join(
                             config.time_res_plot), " ".join(config.path_to_in_mod_ts), config.path_to_in_obs_ts, " ".join(config.label_plot),
-                        config.time_res_axis, " ".join(config.path_to_output_exp), config.path_to_comparison, config.path_to_input_metadata_obs_file])
+                        config.time_res_axis, " ".join(config.path_to_output_exp), config.path_to_comparison, config.path_to_accepted_metadata_obs_file_for_plot])
 
 
 if __name__ == '__main__':
