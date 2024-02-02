@@ -60,10 +60,9 @@ def main(args):
     start_date = date(int(date_in[0:4]), int(date_in[4:6]), int(date_in[6:8]))
     end_date = date(int(date_fin[0:4]), int(date_fin[4:6]), int(date_fin[6:8]))
 
-    # n_time_instants=len(list(daterange(start_date,end_date)))
 
     obs_file = {}
-    print("obs_file: ", path_to_accepted_metadata_obs_file)
+
     with open(path_to_accepted_metadata_obs_file) as f:
         reader = csv.reader(f, delimiter=';')
         next(reader)
@@ -78,12 +77,15 @@ def main(args):
 
     lon = {}
     lat = {}
+    
     mapping(obs_file, lat, lon, path_to_comparison)
+    
     sdev = {}
     crmsd = {}
     ccoef = {}
     vel_mod_ts = {}
     direction_mod_ts = {}
+    
     for i, mod_folder in enumerate(path_to_mod_ts_arr):
         if time_res_arr[i][1] == 'M':
             timerange = pd.date_range(
@@ -103,17 +105,23 @@ def main(args):
         direction_mod_ts[i] = {}
         vel_obs_ts = {}
         direction_obs_ts = {}
+        
         for filename_mod, filename_obs in zip(onlyfiles_mod, onlyfiles_obs):
+            
             splitted_name = np.array(filename_mod.split("_"))
             start_date_index = np.argwhere(splitted_name == date_in)
             name_station_splitted = splitted_name[0:start_date_index[0][0]]
             name_station = '_'.join(name_station_splitted)
+            
             mod_ts = xr.open_dataset(mod_folder + filename_mod)
             mod_ts = mod_ts.resample(TIME=time_res_arr[i]).mean(skipna=True)
+            
             vel_mod_ts[i][name_station] = mod_ts['mod_vel'].data[:]
             direction_mod_ts[i][name_station] = mod_ts['mod_direction'].data[:]
+            
             obs_ts = xr.open_dataset(path_to_obs_ts + filename_obs)
             obs_ts = obs_ts.resample(TIME=time_res_arr[i]).mean(skipna=True)
+            
             vel_obs_ts[name_station] = obs_ts['vel'].data[:]
             direction_obs_ts[name_station] = obs_ts['dir'].data[:]
 
@@ -156,12 +164,7 @@ def main(args):
             np.nanmin(b[~np.isnan(a)]), min_mod_mooring_vel)
         max_mooring_vel[name_stat] = max(
             np.nanmax(b[~np.isnan(a)]), max_mod_mooring_vel)
-        # if not list(a):
-        print("CHECK OBS DIRECTION ", a[~np.isnan(a)])
-        print("CHECK OBS VEL ", b[~np.isnan(a)])
-        print(min_mooring_vel[name_stat])
-        print(max_mooring_vel[name_stat])
-        print("lunghezza obs: ", b[~np.isnan(a)].shape)
+
         ax = WindroseAxes.from_ax()
         turbo = plt.get_cmap('turbo')
         ax.bar(a[~np.isnan(a)], b[~np.isnan(a)], normed=True, bins=np.linspace(
@@ -202,24 +205,20 @@ def main(args):
                     print("nan beccato!")
                     continue
                 else:
-                    print("mod :", vel_mod_ts[exp][name_stat][i])
-                    print("obs :", vel_obs_ts[name_stat][i])
                     bias = vel_mod_ts[exp][name_stat][i] - \
                         vel_obs_ts[name_stat][i]
-                    print("bias :", bias)
+
                     diff_q = (vel_mod_ts[exp][name_stat]
                               [i] - vel_obs_ts[name_stat][i])**2
-                    print("diff_q: ", diff_q)
+
                     bias_ts[exp][timetag] = bias_ts[exp][timetag] + bias
                     diff_q_ts[exp][timetag] = diff_q_ts[exp][timetag] + diff_q
-            print(len(vel_mod_ts[exp].keys()))
+
             rmsd_ts[exp][timetag] = diff_q_ts[exp][timetag] / \
                 len(vel_mod_ts[exp].keys())
-            print(rmsd_ts[exp][timetag])
+
             bias_ts[exp][timetag] = bias_ts[exp][timetag] / \
                 len(vel_mod_ts[exp].keys())
-            print(bias_ts[exp][timetag])
-    print("rmsd_ts: ", rmsd_ts[0])
 
     plot_bias_ts_comparison(date_in, date_fin, time_res_arr, timerange,
                             label_plot_arr, bias_ts, time_res_axis, path_to_comparison)
@@ -237,10 +236,6 @@ def main(args):
             b = vel_obs_ts[name_stat]
             a = a[~np.isnan(b)]
             b = b[~np.isnan(b)]
-            print("taylor mod: ", a[~np.isnan(a)])
-            print(a[~np.isnan(a)].shape)
-            print("taylor mod: ", b[~np.isnan(a)])
-            print(b[~np.isnan(a)].shape)
 
             taylor_stats = sm.taylor_statistics(
                 a[~np.isnan(a)], b[~np.isnan(a)])
@@ -271,7 +266,6 @@ def main(args):
                 print("ccoef: ", taylor_stats['ccoef'])
                 print("ccoef: ", taylor_stats['ccoef'][1])
 
-        #os.makedirs(output_plot_folder_comparison, exist_ok=True)
         obsSTD = [sdev[name_stat][0]]
         s = sdev[name_stat][1:]
         r = ccoef[name_stat][1:]
@@ -303,8 +297,7 @@ def main(args):
                     ') Period: ' + date_in + ' - ' + date_fin
             xlabel = 'Observation Current Velocity [m/s]'
             ylabel = 'Model Current Velocity [m/s]'
-            # print(vel_mod_ts[exp][name_stat])
-            # print(vel_obs_ts[name_stat])
+            
             moor_names.append(name_stat)
             ciao = np.array(vel_obs_ts[name_stat])
             len_not_nan_values.append(len(ciao[~np.isnan(ciao)]))
@@ -335,8 +328,7 @@ def main(args):
             tot_mean_stat = [mean_vel_mod, mean_vel_obs]
             row_stat = tot_mean_stat + qq_statistics_array
             qq_statistics[exp][name_stat] = row_stat
-            #min_model_vel = min(np.nanmin(vel_mod_ts[exp][name_stat]),np.nanmin(vel_obs_ts[name_stat]))
-            #max_model_vel = max(np.nanmax(vel_mod_ts[exp][name_stat]),np.nanmax(vel_obs_ts[name_stat]))
+
             name_file_substring = "_" + \
                 label_plot_arr[exp] + "_" + name_stat + "_windrose"
             title_substring = label_plot_arr[exp] + " Windrose " + name_stat
@@ -346,20 +338,9 @@ def main(args):
             c = direction_obs_ts[name_stat]
             d = vel_obs_ts[name_stat]
 
-            # a=a[~np.isnan(b)]
-            # b=b[~np.isnan(b)]
-            # a=a[~np.isnan(a)]
-            # b=b[~np.isnan(a)]
-
-            # d=d[~np.isnan(c)]
-            # if not list(a):
-            print("CHECK MOD DIRECTION ", a[~np.isnan(a)])
-            print(type(a[~np.isnan(a)][0]))
-            print("CHECK MOD VEL ", b[~np.isnan(a)])
-
             mask = np.isreal(a) & np.isreal(b) & np.isreal(c) & np.isreal(
                 d) & ~np.isnan(a) & ~np.isnan(b) & ~np.isnan(c) & ~np.isnan(d)
-            print("lunghezza mod: ", b[mask].shape)
+
             ax = WindroseAxes.from_ax()
             turbo = plt.get_cmap('turbo')
             ax.bar(a[mask], b[mask], normed=True, bins=np.linspace(min_mooring_vel[name_stat],
@@ -431,10 +412,12 @@ def main(args):
         b = vel_obs_ts[name_stat]
         a = a[~np.isnan(b)]
         b = b[~np.isnan(b)]
+        
         min_value = min(ymin[name_stat].values())
         min_key = [k for k, v in ymin[name_stat].items() if v == min_value][0]
         max_value = max(ymax[name_stat].values())
         max_key = [k for k, v in ymax[name_stat].items() if v == max_value][0]
+        
         plot_windrose(a[~np.isnan(a)], b[~np.isnan(a)], min_mooring_vel[name_stat], max_mooring_vel[name_stat], date_in, date_fin,
                       name_file_substring, title_substring, path_to_comparison, ymin[name_stat][min_key], ymax[name_stat][max_key])
 

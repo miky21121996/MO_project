@@ -2,6 +2,7 @@ from core import Find_Nearest_Mod_Point, Save_Mod_Ts
 import argparse
 import csv
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from datetime import date
 import xarray as xr
 import numpy as np
@@ -67,8 +68,7 @@ def main(args):
         # remove the semicolon at the end of the header row, if present
         if header_row[-1] == ';':
             header_row = header_row[:-1]
-        #first_line = f.readline().rstrip().strip(";").strip()
-        #column_names = first_line.replace(" ","")
+
         column_names = header_row.split(';')
         column_names.append('depth')
         # reader = csv.reader(filter(lambda row: row[0]!='#',f), delimiter=';')
@@ -78,14 +78,9 @@ def main(args):
             if not (row):
                 continue
             row_1 = [val.rstrip() for val in row]
-            print(row)
-            print(row_1)
-            print(depth_obs_set)
             row_1.append(depth_obs_set)
-            print(row)
-            print("columns names: ", column_names)
+
             obs_file[count] = dict(zip(column_names, row_1))
-            print(obs_file[count])
 
         last_lat = column_names[0]
         last_lon = column_names[1]
@@ -124,8 +119,17 @@ def main(args):
             ax1.plot(mod_dict[dict_key]['datetime'][:],
                      mod_dict[dict_key]['velocity'][:])
             ax1.tick_params(axis='x', rotation=45, labelsize=7)
+            ax1.set_title('Original Velocity Time Series')
+            ax1.set_ylabel('velocity (m/s)')
+            ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+            ax1.yaxis.set_major_locator(ticker.MaxNLocator(nbins=4))
             ax2.plot(dict_value['datetime'][:], dict_value['velocity'][:])
             ax2.tick_params(axis='x', rotation=45, labelsize=7)
+            ax2.set_title('Averaged Velocity Time Series')
+            ax2.set_ylabel('velocity (m/s)')
+            ax2.set_xlabel('time')
+            ax2.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.1f'))
+            ax2.yaxis.set_major_locator(ticker.MaxNLocator(nbins=4))
             filename = dict_key + '_plot_mod_ts.png'
             fig.savefig(path_to_plot_mod_ts_arr[i] + filename)
 
@@ -136,8 +140,11 @@ def main(args):
             ax1_dir.plot(mod_dict[dict_key]['datetime'][:],
                          mod_dict[dict_key]['direction'][:])
             ax1_dir.tick_params(axis='x', rotation=45, labelsize=7)
+            ax1_dir.set_ylabel('direction (°)')
             ax2_dir.plot(dict_value['datetime'][:], dict_value['direction'][:])
             ax2_dir.tick_params(axis='x', rotation=45, labelsize=7)
+            ax2_dir.set_ylabel('direction (°)')
+            ax2_dir.set_xlabel('time')
             filename = dict_key + '_plot_dir_ts.png'
             fig_dir.savefig(path_to_plot_mod_ts_arr[i] + filename)
 

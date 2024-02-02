@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../Eval_reanalysis"
+		},
+		{
+			"path": "../../output_eval_for_eas8"
+		},
+		{
+			"path": "../../output_MO_for_EAS7_EAS8"
+		},
+		{
+			"path": "../../HFR_project"
+		},
+		{
+			"path": "../../output_HFR_EAS7"
+		}
+	],
+	"settings": {}
+}

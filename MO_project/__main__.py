@@ -8,7 +8,7 @@ def main():
     config = Configuration(
         '/work/oda/mg28621/MO_project/MO_project/configuration.ini')
 
-    permissive_memory_gb = 5
+    permissive_memory_gb = 1
     if args.link:
         Link_Files(config.paths, config.old_names, config.new_names, config.link_date_in,
                    config.link_date_fin, config.time_res, config.out_paths)
@@ -19,20 +19,20 @@ def main():
                      config.path_to_out_destag_model_folder, config.exp_names, config.destag_time_res, config.mask_paths)
 
     if args.obs_extract:
-        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
+        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_obs_extract', '-o', 'adout_obs_extract', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'obs_extraction.py', config.obs_date_in, config.obs_date_fin, config.path_to_metadata_obs_file,
                         config.time_res_to_average, config.depth_obs, config.nan_treshold,
                         config.path_to_accepted_metadata_obs_file, config.path_to_out_obs_ts, config.path_to_plot_ts])
 
     if args.mod_extract:
-        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
+        subprocess.run(['bsub', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_mod_extract', '-o', 'adout_mod_extract', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'mod_extraction.py', config.mod_date_in, config.mod_date_fin, config.path_to_input_metadata_obs_file,
                         " ".join(config.time_res_model), " ".join(config.time_res_model_to_average), " ".join(
                             config.mod_exp_names), config.depth_obs_for_mod, " ".join(config.path_to_mask),
                         " ".join(config.mod_grid), " ".join(config.path_to_input_model_folder), " ".join(config.path_to_out_mod_ts), " ".join(config.path_to_plot_mod_ts)])
 
     if args.plot_stats:
-        subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_0', '-o', 'adout_0', '-P',
+        subprocess.run(['bsub', '-K', '-n', '1', '-q', 's_long', '-J', 'CURVAL', '-e', 'aderr_plot', '-o', 'adout_plot', '-P',
                         '0510', '-R', f'rusage[mem={permissive_memory_gb}G]', 'python', 'plot_statistics.py', config.plot_date_in, config.plot_date_fin, " ".join(
                             config.time_res_plot), " ".join(config.path_to_in_mod_ts), config.path_to_in_obs_ts, " ".join(config.label_plot),
                         config.time_res_axis, " ".join(config.path_to_output_exp), config.path_to_comparison, config.path_to_accepted_metadata_obs_file_for_plot])

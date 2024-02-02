@@ -26,6 +26,7 @@ def plot_mod_obs_ts_diff_comparison(name_stat, date_in, date_fin, time_res, obs_
     plt.rc('font', size=24)
     plt.title('Surface (3m) Current Velocity BIAS: ' + name_stat + ' (' +
               obs_file[key_obs_file]['lat'] + ', ' + obs_file[key_obs_file]['lon'] + ') \n Period: ' + date_in + '-' + date_fin, fontsize=29)
+    
     for exp in range(len(name_exp)):
         mean_vel_bias = round(np.nanmean(
             np.array(vel_mod_ts[exp][name_stat]-np.array(vel_obs_ts[name_stat]))), 2)
@@ -38,6 +39,7 @@ def plot_mod_obs_ts_diff_comparison(name_stat, date_in, date_fin, time_res, obs_
 
     plt.grid()
     ax.tick_params(axis='both', labelsize=26)
+    
     if time_res_xaxis[1] == 'd':
         ax.xaxis.set_major_locator(
             mdates.DayLocator(interval=int(time_res_xaxis[0])))
@@ -67,6 +69,7 @@ def plot_mod_obs_ts_diff_comparison(name_stat, date_in, date_fin, time_res, obs_
 
 
 def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file, key_obs_file, vel_mod_ts, vel_obs_ts, name_exp, timerange, time_res_xaxis, path_to_output_plot_folder):
+
     plotname = name_stat + '_' + date_in + '_' + date_fin + \
         '_' + time_res[0] + '_mod_obs_ts_comparison.png'
     fig = plt.figure(figsize=(20, 10))
@@ -75,15 +78,14 @@ def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file,
     plt.rc('font', size=24)
     plt.title('Surface (3m) Current Velocity: ' + name_stat + ' (' +
               obs_file[key_obs_file]['lat'] + ', ' + obs_file[key_obs_file]['lon'] + ') \n Period: ' + date_in + '-' + date_fin, fontsize=29)
+    
     for exp in range(len(name_exp)):
         mean_vel_mod = round(np.nanmean(
             np.array(vel_mod_ts[exp][name_stat])), 2)
         plt.plot(timerange, vel_mod_ts[exp][name_stat],
                  label=name_exp[exp] + ' : '+str(mean_vel_mod)+' m/s', linewidth=2, color=color_list[exp])
     mean_vel_obs = round(np.nanmean(np.array(vel_obs_ts[name_stat])), 2)
-    print('TIMERANGE: ', timerange)
-    print(len(vel_obs_ts[name_stat]))
-    print(len(vel_mod_ts[exp][name_stat]))
+    
     plt.plot(timerange, vel_obs_ts[name_stat],
              label='Observation : '+str(mean_vel_obs)+' m/s', linewidth=2, color='green')
     plt.grid()
@@ -121,6 +123,7 @@ def plot_mod_obs_ts_comparison(name_stat, date_in, date_fin, time_res, obs_file,
 
 
 def plot_mod_obs_ECDF_comparison(ii, name_stat, date_in, date_fin, time_res, obs_file, key_obs_file, vel_mod_ts, vel_obs_ts, name_exp, path_to_output_plot_folder, suffix):
+
     plotname = name_stat + '_' + date_in + '_' + \
         date_fin + '_' + time_res[0] + suffix
     fig = plt.figure(figsize=(18, 12))
@@ -138,8 +141,7 @@ def plot_mod_obs_ECDF_comparison(ii, name_stat, date_in, date_fin, time_res, obs
     ecdf_obs = ECDF(np.array(vel_obs_ts[name_stat][ii]))
     plt.axhline(y=0.5, color='black', linestyle="dashed")
     for exp in range(len(name_exp)):
-        print(exp)
-        print("nan values: ", np.array(vel_mod_ts[exp][name_stat][ii]))
+
         ecdf_mod = ECDF(np.array(vel_mod_ts[exp][name_stat][ii]))
         plt.plot(ecdf_mod.x, ecdf_mod.y,
                  label=name_exp[exp], linewidth=4, color=color_list[exp])
@@ -153,7 +155,7 @@ def plot_mod_obs_ECDF_comparison(ii, name_stat, date_in, date_fin, time_res, obs
 def plot_windrose(direction, velocity, minimum, maximum, date_in, date_fin, name_file_substring, title_substring, output_plot_folder, ymin, ymax):
     plotname = date_in + '_' + date_fin + name_file_substring + '.png'
     fig = plt.figure()
-    #plt.rc('font', size=24)
+
     rect = [0.1, 0.1, 0.8, 0.8]
     hist_ax = plt.Axes(fig, rect)
     hist_ax.bar(np.array([1]), np.array([1]))
@@ -165,17 +167,10 @@ def plot_windrose(direction, velocity, minimum, maximum, date_in, date_fin, name
     ax.set_yticks(np.linspace(ymin, ymax, 5))
     ax.set_yticklabels(['{:.2f} %'.format(x)
                        for x in np.linspace(ymin, ymax, 5)], fontsize=12)
-    # Set the y-axis tick format to percentage
-    # ax.yaxis.set_major_formatter(plt.PercentFormatter())
-    # get y-axis limits
-    #ymin, ymax = ax.get_ylim()
-
-    # print y-axis limits
-    #print("y-axis limits:", ymin, ymax)
 
     ax.set_title(title_substring+':' + '\n Period: ' +
                  date_in + '-' + date_fin, fontsize=12)
-    #ax.set_legend(loc='best', bbox_to_anchor=(1., -0.07),)
+
     legend = ax.set_legend(loc=4, bbox_to_anchor=(
         1., -0.07), prop={'size': 23}, framealpha=0.3)
 
@@ -244,10 +239,10 @@ def plot_bias_ts_comparison(date_in, date_fin, time_res, timerange, name_exp, bi
         minimum = -max(maximum, np.nanmax(list(bias_ts[exp].values())))
         #minimum = min(minimum, np.nanmin(list(bias_ts[exp].values())))
         maximum = -min(minimum, np.nanmin(list(bias_ts[exp].values())))
+        
         values = bias_ts[exp].values()
         negated_values = [-x for x in values]  # Negate each value in the list
-        # ax1.plot(timerange, list(bias_ts[exp].values()), label=name_exp[exp]+' : {} m/s'.format(
-        #    round(-np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3, color=color_list[exp])
+
         ax1.plot(timerange, negated_values, label=name_exp[exp]+' : {} m/s'.format(
             round(-np.nanmean(np.array(list(bias_ts[exp].values()))), 2)), linewidth=3, color=color_list[exp])
     ax1.axhline(y=0, color='k', linestyle='--')
@@ -574,7 +569,6 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
             m_element = np.repeat(possible_markers[stat_counter], not_nan_num)
             m = np.concatenate([m, m_element])
 
-        print("all m: ", m)
 #    c_prova = np.tile(np.arange(0,6*len(obs),6),1)
 #    z = gaussian_kde(xy)(xy)
 #    idx = z.argsort()
@@ -600,10 +594,8 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
                             linestyle='None', markersize=5, label=markers_labels))
     else:
         for mark, mark_label in zip(possible_markers, markers_labels):
-            print('label: ', mark_label)
             marker_array.append(mlines.Line2D(
                 [], [], color='blue', marker=mark, linestyle='None', markersize=5, label=mark_label))
-    print("marker array: ", marker_array)
 
     if n_time < 30:
         legend_1 = plt.legend(handles=im.legend_elements(num=n_time)[
@@ -612,8 +604,6 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
     plt.legend(handles=marker_array, loc='upper left', prop={"size": 12})
     if n_time < 30:
         plt.gca().add_artist(legend_1)
-    #plt.legend(list(tuple(possible_markers[:n_stations])), markers_labels,handler_map={tuple:MarkerHandler()},loc='upper left')
-    #plt.legend((im),(hfr_name),loc='lower right')
 
     maxVal = np.nanmax((x, y))
 #    ax.set_ylim(0, maxVal)
@@ -624,10 +614,7 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
     ax.tick_params(axis='both', labelsize=12.5)
 
     bias = BIAS(y, x)
-    print("x: ", x)
     print(x.shape)
-    print("y: ", y)
-    print(y.shape)
     corr, _ = pearsonr(x, y)
     rmse = RMSE(y, x)
     nstd = Normalized_std(y, x)
@@ -670,11 +657,7 @@ def scatterPlot(mod, obs, outname, name, n_stations, n_time, possible_markers, h
     ax.spines['top'].set_visible(False)
     ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-    #ticks_1 = np.linspace(z.min(), z.max(), 5,endpoint=True)
-    # cbar=plt.colorbar(im,fraction=0.02,ticks=ticks_1)
-    #cbar.ax.set_yticklabels(['{:.1f}'.format(x) for x in ticks_1], fontsize=13)
-    #cbar.set_label('probaility density [%]', rotation=270,size=18,labelpad=15)
-
+    
     plt.savefig(outname)
     plt.close()
     return stat_array
@@ -757,8 +740,6 @@ def QQPlot(mod, obs, outname, name, **kwargs):
     cbar.ax.set_yticklabels(['{:.1f}'.format(x) for x in ticks_1], fontsize=13)
     cbar.set_label('probaility density [%]',
                    rotation=270, size=18, labelpad=15)
-    #cbar = plt.colorbar(im, fraction=0.02)
-    #cbar.set_ticks([z.min(), z.max()])
 
     plt.savefig(outname)
     plt.close()

@@ -16,58 +16,51 @@ def Link_Files(paths, old_names, new_names, date_in, date_fin, time_res, out_pat
     current_date = date_in
     for path in out_paths:
         os.makedirs(path, exist_ok=True)
-    # Remove all files in the directory if it already exists
-    #    for filename in os.listdir(path):
-    #        file_path = os.path.join(path, filename)
-    #        try:
-    #            if os.path.isfile(file_path) or os.path.islink(file_path):
-    #                os.unlink(file_path)
-    #        except Exception as e:
-    #            print(f"Failed to delete {file_path}. Reason: {e}")
 
     while current_date <= date_fin:
-        print(current_date)
+        print("current date: ", current_date)
         # Loop through paths
         for i, path in enumerate(paths):
             # Find files
-            for root, dirs, files in os.walk(path):
-            #for file in glob.glob(path + "/" + current_date.strftime("%Y%m%d") + "/model/*"):
-                for file in files:
-                    u_file = None
-                    v_file = None
-                    t_file = None
-                    if old_names[i] in file and time_res[i] in file and current_date.strftime('%Y%m%d') in file:
-                        print(file)
-                        if 'U' in file:
-                            u_file = os.path.join(root, file)
-                            #u_file = file
-                        elif 'V' in file:
-                            v_file = os.path.join(root, file)
-                            #v_file = file
-                        elif 'T' in file:
-                            t_file = os.path.join(root, file)
-                            #t_file = file
+            #for root, dirs, files in os.walk(path):
+            for file in glob.glob(path + "/" + current_date.strftime("%Y%m%d") + "/model/*"):
+                print(file)
+                #for file in files:
+                u_file = None
+                v_file = None
+                t_file = None
+                if old_names[i] in os.path.basename(file) and time_res[i] in os.path.basename(file) and current_date.strftime('%Y%m%d') in os.path.basename(file):
+                    print(os.path.basename(file))
+                    if 'U' in os.path.basename(file):
+                        #u_file = os.path.join(root, file)
+                        u_file = file
+                        print("u_file: ",u_file)
+                    elif 'V' in os.path.basename(file):
+                        #v_file = os.path.join(root, file)
+                        v_file = file
+                        print("v_file: ", v_file)
+                    elif 'T' in os.path.basename(file):
+                        #t_file = os.path.join(root, file)
+                        t_file = file
 
-                    # Link files to output folder
-                        if u_file is not None and v_file is not None and t_file is not None:
-                            os.symlink(u_file, os.path.join(
-                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
-                            os.symlink(v_file, os.path.join(
-                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
-                            # os.symlink(t_file, os.path.join(
-                            #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
-                        elif u_file is not None and 'U' in u_file:
-                            print('ciao')
-                            os.symlink(u_file, os.path.join(
-                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
-                        elif v_file is not None and 'V' in v_file:
-                            print('ciao')
-                            os.symlink(v_file, os.path.join(
-                                out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
-                        elif t_file is not None and 'T' in t_file:
-                            print('ciao oh')
-                            # os.symlink(t_file, os.path.join(
-                            #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
+                # Link files to output folder
+                    if u_file is not None and v_file is not None and t_file is not None:
+                        os.symlink(u_file, os.path.join(
+                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
+                        os.symlink(v_file, os.path.join(
+                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
+                        # os.symlink(t_file, os.path.join(
+                        #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
+                    elif u_file is not None and 'U' in u_file:
+                        os.symlink(u_file, os.path.join(
+                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_U.nc"))
+                    elif v_file is not None and 'V' in v_file:
+                        os.symlink(v_file, os.path.join(
+                            out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_V.nc"))
+                    elif t_file is not None and 'T' in t_file:
+                        print('ciao')
+                        # os.symlink(t_file, os.path.join(
+                        #    out_paths[i], f"{new_names[i]}_{time_res[i]}_{current_date.strftime('%Y%m%d')}_grid_T.nc"))
 
                         # Increment date
         current_date += datetime.timedelta(days=1)
@@ -103,17 +96,17 @@ def Filter_Data(start_date, end_date, obs_file_path, path_to_accepted_metadata_o
         # use column names from file
         data = pd.DataFrame(reader, columns=column_names)
 
-    last_lat = column_names[0]
-    last_lon = column_names[1]
-    num_vlevs = column_names[2]
+    #last_lat = column_names[0]
+    #last_lon = column_names[1]
+    #num_vlevs = column_names[2]
     num_sfc_levs = column_names[3]
     name = column_names[4]
     CMEMS_code = column_names[5]
     WMO_code = column_names[6]
     time_period = column_names[7]
     fields_list = column_names[8]
-    qf_value = column_names[9]
-    path_to_obs_file = column_names[10]
+    #qf_value = column_names[9]
+    #path_to_obs_file = column_names[10]
 
     # apply filters
 
@@ -177,15 +170,16 @@ def Filter_Data(start_date, end_date, obs_file_path, path_to_accepted_metadata_o
     removed_data.to_csv("./removed_data.csv", sep=';', index=False)
 
     # save filtered data to new csv file
-    print(filtered_data)
+
     filtered_data.dropna(
         axis=0,
         how='any',
         inplace=True
     )
-    print(filtered_data)
+
     filtered_data.to_csv(
         path_to_accepted_metadata_obs_file, sep=';', index=False)
+    
     text = open(path_to_accepted_metadata_obs_file, "r")
     text = ''.join([i for i in text])
     # search and replace the contents
@@ -197,18 +191,14 @@ def Filter_Data(start_date, end_date, obs_file_path, path_to_accepted_metadata_o
     print(f'{len(filtered_data)} rows were kept.')
     print(f'{len(removed_data)} rows were removed.')
 
-    return filtered_data, removed_data
 
+def Mask_For_Depth(dataset, depth_value):
+    mask_depth_three = dataset['DEPH'] == depth_value
 
-def Mask_For_Depth(dataset):
-    mask_depth_three = dataset['DEPH'] == 3
-    print(np.count_nonzero(mask_depth_three))
+    mask_range = (((dataset['DEPH'] >= depth_value -1) & (
+        dataset['DEPH'] <= depth_value + 1)) & (dataset['DEPH'] != depth_value))
 
-    mask_range = (((dataset['DEPH'] >= 2) & (
-        dataset['DEPH'] <= 4)) & (dataset['DEPH'] != 3))
-    print(np.count_nonzero(mask_range))
-
-    difference = abs(dataset['DEPH'] - 3)
+    difference = abs(dataset['DEPH'] - depth_value)
     masked_difference_values = difference.where(mask_range)
     # Find the column index of the minimum value in each row
     # Replace all-NaN slices with np.inf
@@ -231,12 +221,11 @@ def Mask_For_Depth(dataset):
     new_mask[coordinates[:, 0], coordinates[:, 1]] = True
     new_mask[inf_rows, :] = False
 
-    # print(mask_variable)
     mask1_no_true = ~mask_depth_three.any(axis=1)
 
     mask_merged = mask_depth_three.copy()
     mask_merged[mask1_no_true] = new_mask[mask1_no_true]
-    print(np.count_nonzero(mask_merged))
+
     return mask_merged
 
 
@@ -358,10 +347,11 @@ def Check_Quality_and_Filter(dataset, dataframe, quality_flag, mask_depth):
                 dir_values.append(wind_direction(value_ewct[0], value_nsct[0]))
             # Append the time for this row to the times list
             times.append(ewct_filtered.TIME[i].values)
+            
     return times, values, dir_values, values_EWCT, values_NSCT
 
 
-def Check_Nan(times, velocities, treshold):
+def Check_Nan(velocities, treshold):
     bool_value = True
     nan_counter = np.count_nonzero(np.isnan(velocities))/len(velocities)
     print("nan counter: ", nan_counter)
@@ -453,10 +443,8 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
         t_mask = np.squeeze(t_mask[0, :, :, :])
 
         for single_date in daterange(start_date, end_date, time_res[i][-1]):
-            print(single_date)
+            print("date: ", single_date)
             timetag = single_date.strftime("%Y%m%d")
-            counter = 0
-            print("name_exp: ", name_exp[i])
 
             u_filename = name_exp[i] + "_" + \
                 time_res[i] + "_" + timetag + "_grid_U.nc"
@@ -474,10 +462,11 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 V_current = xr.open_dataset(
                     listOfFiles[listOfFiles.index(matching_v[0])])
             else:
+                print("file not found (U or V or both).\n Go to next time")
                 continue
 
             if time_res[i] == "1d":
-                [dim_t, dim_depthu, dim_lat, dim_lon] = U_current.vozocrtx.shape
+                [_, _, dim_lat, dim_lon] = U_current.vozocrtx.shape
 
                 u_int = U_current.vozocrtx.values
                 u = u_int[0, :, :, :]
@@ -485,6 +474,8 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 v_int = V_current.vomecrty.values
                 v = v_int[0, :, :, :]
 
+## TO DO: functions to be defined
+                # destaggering of u
                 sum_u_mask = u_mask[:, :, 1:]+u_mask[:, :, :(dim_lon-1)]
                 sum_u = u[:, :, 1:]+u[:, :, :(dim_lon-1)]
                 denominator_u_mask = np.maximum(sum_u_mask, 1)
@@ -508,6 +499,7 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                     destaggered_U_current = destaggered_U_current.drop(
                         ("nav_lon"))
 
+                # save destaggered u in nc file
                 destaggered_U_current = destaggered_U_current.assign(
                     destaggered_u=(('depthu', 'y', 'x'), destaggered_u))
                 destaggered_U_current = destaggered_U_current.assign(
@@ -515,6 +507,9 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 destaggered_U_current = destaggered_U_current.assign(
                     nav_lat=(('y', 'x'), mesh_mask.gphit.values[0, :, :]))
                 destaggered_U_current.destaggered_u.attrs = U_current.vozocrtx.attrs
+
+                destaggered_U_current = destaggered_U_current.drop(
+                        ("vozocrtx"))
 
                 destaggered_U_current.to_netcdf(
                     path_to_destag_output_folder + name_exp[i] + "_" + time_res[i] + "_" + timetag + "_grid_U2T.nc")
@@ -536,13 +531,13 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                     nav_lat=(('y', 'x'), mesh_mask.gphit.values[0, :, :]))
 
                 destaggered_V_current.destaggered_v.attrs = V_current.vomecrty.attrs
-                print(path_to_destag_output_folder +
-                      name_exp[i] + "_" + time_res[i] + "_" + timetag + "_grid_V2T.nc")
+                destaggered_V_current = destaggered_V_current.drop(
+                        ("vomecrty"))
                 destaggered_V_current.to_netcdf(
                     path_to_destag_output_folder + name_exp[i] + "_" + time_res[i] + "_" + timetag + "_grid_V2T.nc")
 
             elif time_res == "1h":
-                [dim_t, dim_lat, dim_lon] = U_current.ssu.shape
+                [_, dim_lat, dim_lon] = U_current.ssu.shape
 
                 u_int = U_current.ssu.values
                 u = u_int[0, :, :]
@@ -550,6 +545,7 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 v_int = V_current.ssv.values
                 v = v_int[0, :, :]
 
+                # destaggering of u
                 sum_u_mask = u_mask[:, 1:]+u_mask[:, :(dim_lon-1)]
                 sum_u = u[:, 1:]+u[:, :(dim_lon-1)]
                 denominator_u_mask = np.maximum(sum_u_mask, 1)
@@ -565,6 +561,7 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 destaggered_v[1:, :] = sum_v / denominator_v_mask
                 destaggered_v = destaggered_v*t_mask
 
+                # save destaggered u in nc file
                 destaggered_U_current = U_current
                 if 'nav_lat' in list(destaggered_U_current.keys()):
                     destaggered_U_current = destaggered_U_current.drop(
@@ -580,6 +577,9 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                 destaggered_U_current = destaggered_U_current.assign(
                     nav_lat=(('y', 'x'), mesh_mask.gphit.values[0, :, :]))
                 destaggered_U_current.destaggered_u.attrs = U_current.ssu.attrs
+                
+                destaggered_U_current = destaggered_U_current.drop(
+                        ("ssu"))
 
                 destaggered_U_current.to_netcdf(
                     path_to_destag_output_folder + name_exp[i] + "_" + time_res[i] + "_" + timetag + "_grid_U2T.nc")
@@ -601,6 +601,8 @@ def Destaggering(date_in, date_fin, path_to_mod_output_arr, path_to_destag_outpu
                     nav_lat=(('y', 'x'), mesh_mask.gphit.values[0, :, :]))
 
                 destaggered_V_current.destaggered_v.attrs = V_current.ssv.attrs
+                destaggered_V_current = destaggered_V_current.drop(
+                        ("ssv"))
                 destaggered_V_current.to_netcdf(
                     path_to_destag_output_folder + name_exp[i] + "_" + time_res[i] + "_" + timetag + "_grid_V2T.nc")
 
@@ -610,7 +612,7 @@ def Find_Nearest_Mod_Point(obs_file, ini_date, name_exp, time_res, path_to_desta
     nearest_point = {}
     for name, obs in obs_file.items():
 
-        print(name)
+        print("Focus on: ",name)
         timetag = ini_date.strftime("%Y%m%d")
 
         destaggered_u_file = name_exp + "_" + time_res + "_" + timetag + "_grid_U2T.nc"
@@ -670,14 +672,14 @@ def Save_Mod_Ts(obs_file, start_date, end_date, name_exp, date_in, date_fin, tem
     mod_dict = {}
     averaged_mod_dict = {}
     for name, obs in obs_file.items():
-        print(name)
+        print("focus on: ", name)
         for single_date in daterange(start_date, end_date, temp_res[-1]):
-            print(single_date.strftime("%Y-%m-%d"))
+            print("date: ", single_date.strftime("%Y-%m-%d"))
             timetag = single_date.strftime("%Y%m%d")
 
             destaggered_u_file = name_exp + "_" + temp_res + "_" + timetag + "_grid_U2T.nc"
             destaggered_v_file = name_exp + "_" + temp_res + "_" + timetag + "_grid_V2T.nc"
-            print(path_to_destag_output_folder + destaggered_u_file)
+
             try:
                 U_current = xr.open_dataset(
                     path_to_destag_output_folder + destaggered_u_file)
@@ -703,15 +705,15 @@ def Save_Mod_Ts(obs_file, start_date, end_date, name_exp, date_in, date_fin, tem
             U_current.close()
             v = V_current.destaggered_v.values[k, j, i]
             V_current.close()
+            
             velocity = math.sqrt(u**2 + v**2)
-            print("velocity: ", velocity)
             mod_direction = wind_direction(u, v)
+            
             append_value(mod_file, name, velocity)
             append_value(mod_dir_file, name, mod_direction)
             append_value(mod_time_file, name, single_date)
 
         array_name = np.array([obs[name_stat], obs[CMEMS_code], obs[WMO_code]])
-        print(array_name)
         boolArr = np.where(array_name != "_")
         output_mod_file = array_name[boolArr][0] + "_" + \
             date_in + "_" + date_fin + "_" + temp_res + "_mod.nc"
@@ -726,7 +728,6 @@ def Save_Mod_Ts(obs_file, start_date, end_date, name_exp, date_in, date_fin, tem
         averaged_time = averaged_time.sel(TIME=slice(start_date, end_date))
 
         # set the datetime column as the index of the DataFrame
-        print("mod file name: ", mod_file[name])
         mod_ds = pd.DataFrame(
             {'datetime': averaged_time['TIME'].data[:], 'velocity': mod_file[name], 'direction': mod_dir_file[name]})
         mod_ds.set_index('datetime', inplace=True)
@@ -740,11 +741,11 @@ def Save_Mod_Ts(obs_file, start_date, end_date, name_exp, date_in, date_fin, tem
         # resample the DataFrame by day, calculating the mean of each group
         averaged_mod_ds = mod_ds.resample(time_res_to_average).mean()
         averaged_mod_velocities = averaged_mod_ds['velocity'].tolist()
-        print("averaged mod velocities: ", averaged_mod_velocities)
+
         averaged_mod_directions = averaged_mod_ds['direction'].tolist()
         averaged_mod_times = averaged_mod_ds.index.tolist()
+        
         if not np.isnan(averaged_mod_velocities).all():
-            print("sono qui")
             mod_dict[array_name[boolArr][0]] = {
                 'datetime': mod_time_file[name], 'velocity': mod_file[name], 'direction': mod_dir_file[name]}
             averaged_mod_dict[array_name[boolArr][0]] = {
@@ -752,7 +753,7 @@ def Save_Mod_Ts(obs_file, start_date, end_date, name_exp, date_in, date_fin, tem
 
         averaged_mod_ds = xr.Dataset(data_vars=dict(TIME=(['TIME'], averaged_mod_dict[array_name[boolArr][0]]['datetime'][:]), mod_vel=(
             ['TIME'], averaged_mod_dict[array_name[boolArr][0]]['velocity'][:]), mod_direction=(['TIME'], averaged_mod_dict[array_name[boolArr][0]]['direction'][:])))
-        # averaged_mod_ds=mod_ds.resample(TIME=time_res_to_average).mean(skipna=True)
+
         averaged_mod_ds.to_netcdf(
             path=path_to_output_mod_ts_folder + output_mod_file)
 
